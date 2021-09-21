@@ -1,0 +1,152 @@
+---
+title: "Network_HW5"
+author: "Chenrui Xu"
+date: "2021/3/21"
+output: html_document
+---
+
+```{r}
+library(igraph)
+library(UserNetR)
+library(ergm)
+library(intergraph)
+```
+
+```{r}
+data("Coevolve")
+Coevolve
+```
+
+```{r}
+fr_w1 <- Coevolve$fr_w1
+class(fr_w1)
+fr_w1 <- as.undirected(fr_w1)
+fr_w1 <- asNetwork(fr_w1)
+
+fr_w2 <- Coevolve$fr_w2
+fr_w2 <- as.undirected(fr_w2)
+fr_w2 <- asNetwork(fr_w2)
+
+fr_w3 <- Coevolve$fr_w3
+fr_w3 <- as.undirected(fr_w3)
+fr_w3 <- asNetwork(fr_w3)
+
+fr_w4 <- Coevolve$fr_w4
+fr_w4 <- as.undirected(fr_w4)
+fr_w4 <- asNetwork(fr_w4)
+```
+
+```{r}
+fr_w1
+```
+
+```{r}
+W1mod0 <- ergm(fr_w1 ~ edges, control=control.ergm(seed = 40))
+summary(W1mod0)
+```
+
+
+
+```{r}
+W1mod1 <- ergm(fr_w1 ~ edges + nodefactor('gender') + nodefactor('smoke'), control=control.ergm(seed = 40))
+summary(W1mod1)
+```
+
+```{r}
+W1mod2 <- ergm(fr_w1 ~ edges 
+               #+nodefactor('gender')+nodefactor('smoke')
+               + nodematch('gender') + 
+                 nodematch('smoke'), control=control.ergm(seed = 40))
+summary(W1mod2)
+```
+
+```{r}
+W1mod3 <- ergm(fr_w1 ~ edges
+               #+ nodefactor('gender') + nodefactor('smoke') 
+               + nodematch('gender', diff=TRUE)+ nodematch('smoke', diff=TRUE), 
+               control=control.ergm(seed = 40))
+summary(W1mod3)
+```
+
+```{r}
+W1mod4 <- ergm(fr_w1 ~ edges
+               + nodematch('gender', diff=TRUE)+ gwesp(0.7, fixed=TRUE), control=control.ergm(seed = 40))
+summary(W1mod4)
+```
+
+```{r}
+W2mod0 <- ergm(fr_w2 ~ edges, control=control.ergm(seed = 40))
+summary(W2mod0)
+```
+
+```{r}
+W2mod1 <- ergm(fr_w2 ~ edges + nodefactor('gender') + nodefactor('smoke'), control=control.ergm(seed = 40))
+summary(W2mod1)
+```
+
+```{r}
+W2mod2 <- ergm(fr_w2 ~ edges 
+               + nodematch('gender', diff=TRUE) + 
+                 nodematch('smoke', diff=TRUE), control=control.ergm(seed = 40))
+summary(W2mod2)
+```
+
+```{r}
+W2mod3 <- ergm(fr_w2 ~ edges + nodematch('gender', diff=TRUE) 
+               + nodematch('smoke', diff=TRUE) 
+               + gwesp(0.7, fixed=TRUE), control=control.ergm(seed = 40))
+summary(W2mod3)
+```
+
+```{r}
+W3mod0 <- ergm(fr_w3 ~ edges, control=control.ergm(seed = 40))
+summary(W3mod0)
+```
+
+```{r}
+W3mod1 <- ergm(fr_w3 ~ edges + nodefactor('gender') + nodefactor('smoke'), control=control.ergm(seed = 40))
+summary(W3mod1)
+```
+
+```{r}
+W3mod2 <- ergm(fr_w3 ~ edges + nodematch('gender', diff=TRUE) + 
+                 nodematch('smoke', diff=TRUE), control=control.ergm(seed = 40))
+summary(W3mod2)
+```
+
+```{r}
+W3mod3 <- ergm(fr_w3 ~ edges + nodematch('gender', diff=TRUE) + 
+                 nodematch('smoke', diff=TRUE) + gwesp(0.7, fixed=TRUE), control=control.ergm(seed = 40))
+summary(W3mod3)
+```
+
+```{r}
+W4mod0 <- ergm(fr_w4 ~ edges, control=control.ergm(seed = 40))
+summary(W4mod0)
+```
+
+```{r}
+W4mod1 <- ergm(fr_w4 ~ edges + nodefactor('gender') + nodefactor('smoke'), control=control.ergm(seed = 40))
+summary(W4mod1)
+```
+
+```{r}
+W4mod2 <- ergm(fr_w4 ~ edges + nodematch('gender', diff=TRUE) + 
+                 nodematch('smoke', diff=TRUE), control=control.ergm(seed = 40))
+summary(W4mod2)
+```
+
+```{r}
+W4mod3 <- ergm(fr_w4 ~ edges + nodematch('gender', diff=TRUE) + 
+                 nodematch('smoke', diff=TRUE) + gwesp(0.7, fixed=TRUE), control=control.ergm(seed = 40))
+summary(W4mod3)
+```
+
+
+```{r}
+plogis(coef(W1mod0))
+plogis(coef(W2mod0))
+plogis(coef(W3mod0))
+plogis(coef(W4mod0))
+```
+

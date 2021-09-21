@@ -1,0 +1,307 @@
+---
+title: "Network_Final"
+author: "Chenrui Xu"
+date: "2021/5/8"
+output: html_document
+---
+
+```{r}
+library(sand)
+library(networkTomography)
+library(igraph)
+library(statnet)
+```
+
+```{r}
+netmat <- rbind(c(1,2),
+                c(2,1),
+  c(2,3),
+  c(2,9),
+  c(3,4),
+  c(3,5),
+  c(3,11),
+  c(4,3),
+  c(5,6),
+  c(5,7),
+  c(5,13),
+  c(6,5),
+  c(7,2),
+  c(7,8),
+  c(7,15),
+  c(8,7),
+  c(9,10),
+  c(10,3),
+  c(10,17),
+  c(11,12),
+  c(12,5),
+  c(12,17),
+  c(13,14),
+  c(14,7),
+  c(14,17),
+  c(15,16),
+  c(16,2),
+  c(16,17),
+  c(17,2),
+  c(17,3),
+  c(17,5),
+  c(17,7),
+  c(17,9),
+  c(17,11),
+  c(17,13),
+  c(17,15)
+)
+net <- network(netmat, matrix.type = "edgelist", directed = TRUE)
+network.vertex.names(net) <- c("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q")
+gplot(net, vertex.cex = 3,
+      label.pos = 5, arrowhead.cex = 1,
+      displaylabels = TRUE, mode='fruchtermanreingold')
+```
+
+```{R}
+path="C:/Users/StevenRui/Desktop/Network/Final"
+Road=read.csv("C:/Users/StevenRui/Desktop/Network/Final/FinalProjectRoad.csv")
+Transportation=read.csv("C:/Users/StevenRui/Desktop/Network/Final/FinalProjectTransportation.csv")
+```
+
+```{r}
+head(Road)
+```
+
+```{r}
+data=data.frame(Road[,c(2,3,4,6,7,9,10,11,13,14,15,17)])
+data=as.matrix(data)
+head(data)
+dim(data)
+```
+
+```{r}
+dim(data)
+```
+
+```{r}
+B=read.csv("C:/Users/StevenRui/Desktop/Network/Final/B.csv",head=F)
+B=as.matrix(B)
+dim(B)
+# B2=rbind(
+#   c(1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0),
+#   c(0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0),
+#   c(0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0),
+#   c(0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1),
+#   c(1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0),
+#   c(0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0),
+#   c(0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0),
+#   c(0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1)
+# )
+# dim(B2)
+```
+
+```{r}
+head(B)
+```
+
+
+```{r}
+tomo.fit <- tomogravity(data,B,0.01)
+
+zhat <- tomo.fit$Xhat#[,c(2,3,4,5,7,8,9,10,12,13,14,15)]
+dim(zhat)
+head(zhat)
+View(zhat)
+```
+
+```{r}
+Z=Transportation[,2:13]
+nt=nrow(Z)
+nf=ncol(Z)
+t.dat=data.frame(z=as.vector(c(Z)),
+zhat=as.vector(c(zhat)),t=c(rep(as.vector(Road$month),nf)))
+od.names=c (
+rep('A−>D',nt),
+rep('A−>F',nt),
+rep('A−>H',nt),
+rep('D−>A',nt),
+rep('D−>F',nt),
+rep('D−>H',nt),
+rep('F−>A',nt),
+rep('F−>D',nt),
+rep('F−>H',nt),
+rep('H−>A',nt),
+rep('H−>D',nt),
+rep('H−>F',nt))
+t.dat=transform(t.dat,OD=od.names)
+z=as.vector(c(Z))
+z=sapply(z,as.numeric)
+
+xyplot(z~t|OD, data=t.dat,
+panel=function(x,y,subscripts){
+panel.xyplot(x,y,type='l',col.line='green')
+panel.xyplot(t.dat$t[subscripts],
+t.dat$zhat[subscripts],
+type='l',col.line='red')
+},as.table=T,subscripts=T,xlim=c(0,96),
+xlab='month',ylab='flow')
+```
+
+```{r}
+View(Transportation)
+View(zhat)
+```
+
+
+```{r}
+# my.df.in <- data2[,c(2,3,5,7)]
+# my.df.out <- data2[,c(1,4,6,8)]
+# ```
+# 
+# ```{r}
+# plot(my.df.in[,1],type="o")
+# ```
+# 
+# ```{r}
+# plot(my.df.in[,2],type="o")
+# ```
+# 
+# ```{r}
+# plot(my.df.in[,3],type="o")
+# ```
+# 
+# ```{r}
+# plot(my.df.in[,4],type="o")
+# ```
+# 
+# ```{r}
+# plot(my.df.out[,1],type="o")
+# ```
+# 
+# ```{r}
+# plot(my.df.out[,2],type="o")
+# ```
+# 
+# ```{r}
+# plot(my.df.out[,3],type="o")
+# ```
+# 
+# ```{r}
+# plot(my.df.out[,4],type="o")
+# ```
+# 
+# 
+# ```{r}
+# Z=Transportation[,2:13]
+# nt <- nrow(Z);   
+# nf <- ncol(Z)
+# 
+# # B <- bell.labs$A
+# # dim(B)
+# # Z <- bell.labs$X
+# # dim(Z)
+# # x <- bell.labs$Y
+# # dim(x)
+# # 
+# # B.full <- rbind(B, 2 - colSums(B))
+# # write.table(format(B.full),
+# #    row.names=F, col.names=F, quote=F)
+# # 
+# # x.full <- Z %*% t(B.full)
+# # tomo.fit <- tomogravity(x.full, B.full, 0.01)
+# # names(tomo.fit)
+# # zhat <- tomo.fit$Xhat
+# # dim(zhat)
+# 
+# 
+# t.dat <- data.frame(z = as.vector(c(Z)),
+#                     zhat2 = as.vector(c(zhat2)),
+#                     t <- c(rep(as.vector(Transportation[,1]), nf)))
+# 
+# 
+# od.names <- c(rep("A->D", nt),
+#       rep("A->F", nt), rep("A->H", nt),
+#       rep("D->A", nt), rep("D->F", nt),
+#       rep("D->H", nt), rep("F->A", nt),
+#       rep("F->D", nt), rep("F->H", nt),
+#       rep("H->A", nt), rep("H->D", nt),
+#       rep("H->F", nt))
+# 
+# t.dat <- transform(t.dat, OD = od.names)
+# 
+# xyplot(z~t | OD, data=t.dat,
+#  panel=function(x, y, subscripts){
+#   panel.xyplot(x, y, type="l", col.line="black")
+#   panel.xyplot(t.dat$t[subscripts],
+#   t.dat$zhat[subscripts],
+#   type="l", col.line="red")
+#  }, as.table=T, subscripts=T, xlim=c(0, 24),
+#  xlab="Hour of Day", ylab="Kbytes/sec")
+# 
+# View(Z)
+# ```
+# 
+# 
+# ```{r}
+# year<-c(1993,1998,2003,2008)
+# Res<-c(0.0227,0.0198,0.0155,0.0147)
+# COPD<-c(0.0138,0.0125,0.0075,0.0069)
+# 
+# plot(year,Res,col=2,type="b",ylim=c(0.005,0.035),xlab = "Year",ylab ="Morbidity")
+# lines(year,COPD,col=3,type="b")
+# legend("topright",pch=c(15,15),legend=c("Respiratory","COPD"),col=c(2,3),bty="n")
+# 
+# #R语言基础包作图
+# plot(Transportation[,1],Z[,1],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,1])/2,col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,2],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,2])/2,col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,3],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,3]),col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,4],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,4]),col=3,type="b")
+# ```
+# 
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,5],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,5]),col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,6],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,6]),col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,7],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,7]),col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,8],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,8]),col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,9],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,9]),col=3,type="b")
+#```
+
+#```{r}
+# plot(Transportation[,1],Z[,10],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,10]),col=3,type="b")
+# ```
+# 
+# ```{r}
+# plot(Transportation[,1],Z[,11],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,11]),col=3,type="b")
+# ```
+# ```{r}
+# plot(Transportation[,1],Z[,12],col=2,type="b",xlab = "Month",ylab ="Flow")
+# lines(Transportation[,1],c(zhat2[,12]),col=3,type="b")
+```

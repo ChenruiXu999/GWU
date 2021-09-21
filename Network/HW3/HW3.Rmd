@@ -1,0 +1,141 @@
+---
+title: "6289_HW4"
+author: "Chenrui Xu"
+date: "2021/2/21"
+output: html_document
+---
+
+```{r}
+library(statnet)
+library(UserNetR)
+library(igraph)
+library(intergraph)
+```
+
+```{r}
+netmat=rbind(
+  # a b c d e f g h i j
+  c(0,1,1,0,0,0,0,0,0,0),#a
+  c(1,0,1,0,0,0,0,0,0,0),#b
+  c(1,1,0,1,1,0,1,0,0,0),#c
+  c(0,0,1,0,1,0,0,0,0,0),#d
+  c(0,0,1,1,0,1,0,0,0,0),#e
+  c(0,0,0,0,1,0,1,0,0,0),#f
+  c(0,0,1,0,0,1,0,1,0,0),#g
+  c(0,0,0,0,0,0,1,0,1,1),#h
+  c(0,0,0,0,0,0,0,1,0,0),#i
+  c(0,0,0,0,0,0,0,1,0,0)
+)
+```
+
+```{r}
+rownames(netmat)<-c('a','b','c','d','e','f','g','h','i','j')
+colnames(netmat)<-c('a','b','c','d','e','f','g','h','i','j')
+net=network(netmat,matrix.tpye="adjacency",directed = F)
+#set.vertex.attribute(net,'name',c('a','b','c','d','e','f','g','h','i','j'))
+```
+
+```{r}
+gplot(net,displaylabels = T)
+```
+
+Part 1
+```{r}
+sna::degree(net,gmode = "graph")
+```
+
+```{r}
+sna::closeness(net,gmode="graph")
+```
+
+```{r}
+sna::betweenness(net,gmode="graph")
+```
+
+Part 2
+```{r}
+inet=asIgraph(net)
+coreness=graph.coreness(inet)
+coreness
+```
+
+```{r}
+inet2 <- induced.subgraph(inet, vids=which(coreness > 1))
+plot(inet2)
+```
+
+Part 3
+```{r}
+table(V(inet))
+V(inet)[1:10]
+modularity(inet,V(inet))
+```
+
+```{r}
+cw=cluster_walktrap(inet)
+membership(cw)
+modularity(cw)
+```
+
+```{r}
+ceb=cluster_edge_betweenness(inet)
+modularity(ceb)
+membership(ceb)
+```
+
+```{r}
+cs=cluster_spinglass(inet)
+modularity(cs)
+membership(cs)
+```
+
+```{r}
+cfg=cluster_fast_greedy(inet)
+modularity(cfg)
+membership(cfg)
+```
+
+```{r}
+clp=cluster_label_prop(inet)
+modularity(clp)
+membership(clp)
+```
+
+```{r}
+cle=cluster_leading_eigen(inet)
+modularity(cle)
+membership(cle)
+```
+
+```{r}
+cl=cluster_louvain(inet)
+modularity(cl)
+membership(cl)
+```
+
+```{r}
+co=cluster_optimal(inet)
+modularity(co)
+membership(co)
+```
+
+```{r}
+im=cluster_infomap(inet)
+modularity(im)
+membership(im)
+```
+
+```{r}
+table(V(inet),membership(cw))
+```
+
+Part 4
+```{r}
+plot(cw,inet, vertex.label = net%v%'vertex.names')
+```
+
+
+```{r}
+
+```
+

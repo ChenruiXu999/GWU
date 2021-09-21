@@ -1,0 +1,224 @@
+---
+title: "Network_HW2"
+author: "Chenrui Xu"
+date: "2021/2/13"
+output: html_document
+---
+
+```{r}
+library(statnet)
+library(UserNetR)
+library(RColorBrewer)
+set.seed(123)
+```
+
+Part 1 setting matrix
+```{r}
+netmat=rbind(c(1,2), #1
+             c(1,3), #2
+             c(1,4), #3
+             c(1,5), #4
+             c(1,6), #5
+             c(1,7), #6
+             c(1,8), #7
+             c(1,9), #8
+             c(1,10),#9
+             c(1,11),#10
+             c(1,12),#11
+             c(1,13),#12
+             c(1,14),#13
+             c(1,15),#14
+             c(1,16),#15
+             c(1,17),#16
+             #c(2,1), #17 #1
+             c(2,3), #18
+             c(2,4), #19
+             c(2,8), #20
+             c(2,13),#21
+             c(2,14),#22
+             c(2,15),#23
+             c(2,16),#24
+             #c(3,1), #25 #2
+             #c(3,2), #26 #18
+             c(3,4), #27
+             c(3,8), #28
+             c(3,9), #29
+             c(3,13),#30
+             #c(4,1), #31 #3
+             #c(4,2), #32 #19
+             #c(4,3), #33 #27
+             c(4,8), #34
+             c(4,12),#35
+             c(4,13),#36
+             #c(5,1), #37 #4
+             c(5,7), #38
+             c(5,10),#39
+             #c(6,1), #40 #5
+             c(6,7), #41
+             c(6,10)#42
+             #c(7,1), #43 #6
+             #c(7,5), #44 #38
+             #c(7,6), #45 #41
+             #c(8,1), #46 #7
+             #c(8,2), #47 #20
+             #c(8,3), #48 #28
+             #c(8,4), #49 #34
+             #c(9,1), #50 #8
+             #c(9,3), #51 #29
+             #c(10,1),#52 #9
+             #c(10,5),#53 #39
+             #c(10,6),#54 #42
+             #c(11,1),#55 #10
+             #c(12,1),#56 #11
+             #c(12,4),#57 #35
+             #c(13,1),#58 #12
+             #c(13,2),#59 #21
+             #c(13,3),#60 #30
+             #c(13,4),#61 #36
+             #c(14,1),#62 #13
+             #c(14,2),#63 #22
+             #c(15,1),#64 #14
+             #c(15,2),#65 #23
+             #c(16,1),#66 #15
+             #c(16,2),#67 #24
+             #c(17,1) #68 #16
+)
+```
+
+```{r}
+net <- network(netmat,matrix.type="edgelist",directed = FALSE)
+
+network.vertex.names(net)<-c("a1","a2","a3","a4","a5","a6","a7","a8","a9","a11","a12","a13","a14","a18","a20","a22","a32")
+```
+Turn matrix into edgelist network data and give them nodes names.
+
+
+Part2
+```{r}
+set.vertex.attribute(net,"role",c('lightblue','lightblue','lightblue','lightblue','lightblue','lightblue','lightblue','lightblue',"pink",'lightblue','lightblue','lightblue','lightblue','lightblue','lightblue','lightblue','pink'))
+```
+Give nodes the role attributes and set nodes colors.
+
+```{r}
+#set.vertex.attribute(net,"shape",c(4,4,4,4,4,4,4,4,10000,4,4,4,4,4,4,4,10000))
+set.vertex.attribute(net,"shape",c(1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2))
+```
+Give nodes the shape attributes as 4 is the square and circle we can view it as infinite of edges shape square.
+
+```{r}
+set.edge.attribute(net,"ecolor",c('royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','gold1','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','gold1','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','gold1','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4'))
+```
+in terms of edges, we can set color to be royalblue and gold
+
+The setting of the width, we put it into gplot() and according to the plot shown in the Powerpoint, we can set the numbers.
+```{r}
+set.seed(123)
+rolelab=net%v%"role"
+shape=net%v%"shape"
+my_pal <- c('lightblue','pink')
+ecolor=net%e%"ecolor"
+op <- par(mar=c(0,0,0,0))
+gplot(net,gmode="graph",
+      mode="fruchtermanreingold",
+      vertex.cex=2.5,
+      main="FruchtermanReingold",
+      vertex.col =rolelab,
+      displaylabels=T,
+      label.pos=5,
+      vertex.sides =c(4,10000)[shape],vertex.rot=45,#let square shape rotate 45
+      edge.lwd=c(10,12,8,8,8,8,6,6,6,4,8,2,8,4,4,4,16,8,10,12,2,4,4,8,10,12,8,8,8,8,4,8,12,8),
+               # 1  2  3 4 5 6 7 8 9 0 1 2 3 4 5 6 7  8 9  0  1 2 3 4 5  6  7 8 9 0 1 2 3  4
+               # 0                 1                       2                      3
+      edge.col = ecolor
+      )
+par(op)
+```
+
+Part 3
+```{r}
+deg=degree(net,gmode = "graph")
+deg
+```
+
+```{r}
+rescale=function(nchar,low,high){
+  min_d=min(nchar)
+  max_d=max(nchar)
+  rscl=((high-low)*(nchar-min_d))/(max_d-min_d)+low
+  rscl
+}
+```
+
+```{r}
+n_edge=network.edgecount(net)
+edge_cat=sample(1:4,n_edge,replace=T)
+```
+
+```{r}
+set.edge.attribute(net,"ecolor",c('royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','gold1','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','gold1','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','gold1','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4','royalblue4'))
+ecolor=net%e%"ecolor"
+```
+
+
+```{r}
+my_pal=c("skyblue","pink")
+rolecat=as.factor(get.vertex.attribute(net,"role"))
+```
+
+
+```{r}
+set.seed(123)
+op=par(mar=c(0,0,0,0),mfrow=c(1,2))
+plot(net,
+     mode="fruchtermanreingold",
+     usearrows=F,
+     vertex.cex=rescale(deg,5,8),
+     main="Adjusted node sizes with rescale function",
+     displaylabels=T,
+     edge.lty=c(2,3,4,5)[edge_cat],#"solid"
+     #edge.lty=b,#c('solid','dashed','dotted','dotdashed'),#[edge_cat],
+     vertex.col=my_pal[rolecat],
+     label.pos=5,
+     vertex.sides =c(4,10000)[shape],vertex.rot=45,#let square shape rotate 45
+     edge.lwd=c(10,12,8,8,8,8,6,6,6,4,8,2,8,4,4,4,16,8,10,12,2,4,4,8,10,12,8,8,8,8,4,8,12,8),
+     edge.col = ecolor
+     )
+legend("bottomleft",
+       legend=c("A","B"),
+       col=my_pal,pch=15,
+       pt.cex=1.5,
+       bty="n",
+       title="role"
+       )
+par(op)
+```
+
+```{r}
+op=par(mar=c(0,0,0,0),mfrow=c(1,2))
+gplot(net,
+     mode="fruchtermanreingold",
+     usearrows=F,
+     vertex.cex=rescale(deg,2,6),
+     main="Adjusted node sizes with rescale function",
+     displaylabels=T,
+     edge.lty=c(2,3,4,5)[edge_cat],
+     vertex.col=my_pal[rolecat],
+     label.pos=5,
+     vertex.sides =c(4,10000)[shape],vertex.rot=45,#let square shape rotate 45
+     edge.lwd=c(10,12,8,8,8,8,6,6,6,4,8,2,8,4,4,4,16,8,10,12,2,4,4,8,10,12,8,8,8,8,4,8,12,8),
+     edge.col = "gray50"
+     )
+legend("bottomleft",
+       legend=c("A","B"),
+       col=my_pal,pch=19,
+       pt.cex=1.5,
+       bty="n",
+       title="role"
+       )
+par(op)
+```
+
+
+```{r}
+
+```

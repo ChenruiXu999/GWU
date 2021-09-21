@@ -1,0 +1,260 @@
+---
+title: "Network_HW6"
+author: "Chenrui Xu"
+date: "2021/3/28"
+output: html_document
+---
+
+```{r}
+library(igraph)
+library(UserNetR)
+library(RSiena)
+library(Matrix)
+data(Coevolve)
+set.seed(999)
+```
+
+```{r}
+fr_w1=Coevolve$fr_w1
+fr_w2=Coevolve$fr_w2
+fr_w3=Coevolve$fr_w3
+fr_w4=Coevolve$fr_w4
+```
+
+```{r}
+matw1 <- as.matrix(get.adjacency(fr_w1))
+matw2 <- as.matrix(get.adjacency(fr_w2))
+matw3 <- as.matrix(get.adjacency(fr_w3))
+matw4 <- as.matrix(get.adjacency(fr_w4))
+```
+
+```{r}
+fr4wav<-sienaDependent(
+   array(c(matw1,matw2,matw3,matw4),
+   dim=c(37,37,4)), sparse=FALSE)
+class(fr4wav)
+fr4wav
+```
+
+```{r}
+w1 <- cbind(get.edgelist(fr_w1), 1)
+w2 <- cbind(get.edgelist(fr_w2), 1)
+w3 <- cbind(get.edgelist(fr_w3), 1)
+w4 <- cbind(get.edgelist(fr_w4), 1)
+w1s <- spMatrix(37, 37, w1[,1], w1[,2], w1[,3])
+w2s <- spMatrix(37, 37, w2[,1], w2[,2], w2[,3])
+w3s <- spMatrix(37, 37, w3[,1], w3[,2], w3[,3])
+w4s <- spMatrix(37, 37, w4[,1], w4[,2], w4[,3])
+fr4wav2 <- sienaDependent(list(w1s,w2s,w3s,w4s))
+fr4wav2
+```
+
+```{r}
+gender_vect <- V(fr_w1)$gender
+table(gender_vect)
+gender <- coCovar(gender_vect)
+gender
+```
+
+```{r}
+smoke <- array(
+   c(V(fr_w1)$smoke, V(fr_w2)$smoke,
+      V(fr_w3)$smoke, V(fr_w4)$smoke),
+   dim=c(37,4))
+smokebeh <- sienaDependent(smoke,
+   type = "behavior")
+smokebeh
+```
+
+```{r}
+friend <- sienaDataCreate(fr4wav,smokebeh,gender)
+friend
+```
+
+```{r}
+frndeff <- getEffects(friend)
+frndeff
+```
+
+```{r}
+effectsDocumentation(frndeff)
+```
+
+```{r}
+frndeff <- getEffects(friend)
+
+frndeff1 <- getEffects(friend)
+#frndeff2 <- getEffects(friend)
+
+# frndeff2 <- includeEffects(frndeff2,sameX,
+# interaction1="gender",name="fr4wav")
+# 
+# frndeff2 <- includeEffects(frndeff2,sameX,
+# interaction1="smokebeh",name="fr4wav")
+
+frndeff1 <- includeEffects(frndeff1,sameX,
+interaction1="gender",name="fr4wav")
+
+frndeff1 <- includeEffects(frndeff1,egoX,
+interaction1="gender",name="fr4wav")
+
+frndeff1 <- includeEffects(frndeff1,altX,
+interaction1="gender",name="fr4wav")
+
+frndeff1 <- includeEffects(frndeff1,egoX,
+interaction1="smokebeh",name="fr4wav")
+
+frndeff1 <- includeEffects(frndeff1,altX,
+interaction1="smokebeh",name="fr4wav")
+
+frndeff1 <- includeEffects(frndeff1,sameX,
+interaction1="smokebeh",name="fr4wav")
+
+frndeff1 <- includeEffects(frndeff1,avSim,
+interaction1="fr4wav",name="smokebeh")
+
+frndeff1 <- includeEffects(frndeff1,totSim,
+interaction1="fr4wav",name="smokebeh")
+
+frndeff1 <- includeEffects(frndeff1,recip,transTrip,
+name="fr4wav")
+```
+
+```{r}
+frndeff
+```
+
+```{r}
+frndeff1
+```
+
+Question 2
+```{r}
+myalgorithm <- sienaAlgorithmCreate(projname='coevolve')
+RSmod1<-siena07(myalgorithm,data=friend,effects=frndeff1,batch=T,verbose = F,useCluster = T,initC = T,nbrNodes = 3,returnDeps=TRUE)
+```
+
+```{r}
+RSmod1
+```
+
+
+```{r}
+RSmod1$sims[[1]]
+```
+
+```{r}
+summary(RSmod1)
+```
+
+```{r}
+# myalgorithm <- sienaAlgorithmCreate(projname='coevolve')
+# RSmod2<-siena07(myalgorithm,data=friend,effects=
+#                   S
+#                 frndeff2,batch=T,verbose = F,useCluster = T,initC = T,nbrNodes = 3,returnDeps=TRUE)
+# RSmod2
+```
+
+Question 3
+```{r}
+el1 <- RSmod1$sims[[1]][[1]][[1]][[1]]
+sb1 <- RSmod1$sims[[1]][[1]][[2]][[1]]
+el2 <- RSmod1$sims[[1]][[1]][[1]][[2]]
+sb2 <- RSmod1$sims[[1]][[1]][[2]][[2]]
+el3 <- RSmod1$sims[[1]][[1]][[1]][[3]]
+sb3 <- RSmod1$sims[[1]][[1]][[2]][[3]]
+
+sim1 <- graph.data.frame(el1,directed = TRUE)
+sim2 <- graph.data.frame(el2,directed = TRUE)
+sim3 <- graph.data.frame(el3,directed = TRUE)
+
+w1 <- cbind(get.edgelist(fr_w1), 1)
+w1s <- spMatrix(37, 37, w1[,1], w1[,2], w1[,3])
+w2s_sim=spMatrix(37,37,el1[,1],el1[,2],el1[,3])
+w3s_sim=spMatrix(37,37,el2[,1],el2[,2],el2[,3])
+w4s_sim=spMatrix(37,37,el3[,1],el3[,2],el3[,3])
+
+fr4wav4=sienaDependent(list(w1s,w2s_sim,w3s_sim,w4s_sim))
+smoke_sim=array(c(V(fr_w1)$smoke,sb1,sb2,sb3),dim=c(37,4))
+smoke_beh_sim=sienaDependent(smoke_sim,type="behavior")
+friend_sim=sienaDataCreate(fr4wav4,smoke_beh_sim,gender)
+
+
+# V(sim1)$smoke <- sb1
+# V(sim1)$gender <- V(fr_w4)$gender
+# sim1
+# 
+# matsim1=as.matrix(get.adjacency(sim1))
+# simwav1=sienaDependent(matsim1,sparse=F)
+# simgender_vect1=V(sim1)$gender
+# gender1 <- coCovar(simgender_vect1)
+# 
+# smoke1 <- array(V(sim1)$smoke,dim=c(37,1))
+# smokebeh1 <- sienaDependent(c(smoke1),type = "behavior")
+# smokebeh1
+# 
+# 
+# w1 <- cbind(get.edgelist(fr_w1), 1)
+# w1s <- spMatrix(37, 37, w1[,1], w1[,2], w1[,3])
+```
+
+```{r}
+friend_sim
+```
+
+
+```{r}
+frndeff1_sim <- getEffects(friend_sim)
+frndeff2_sim <- getEffects(friend_sim)
+
+frndeff2_sim <- includeEffects(frndeff2_sim,sameX,
+interaction1="gender",name="fr4wav4")
+
+frndeff2_sim <- includeEffects(frndeff2_sim,sameX,
+interaction1="smoke_beh_sim",name="fr4wav4")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,sameX,
+interaction1="gender",name="fr4wav4")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,egoX,
+interaction1="gender",name="fr4wav4")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,altX,
+interaction1="gender",name="fr4wav4")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,egoX,
+interaction1="smoke_beh_sim",name="fr4wav4")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,altX,
+interaction1="smoke_beh_sim",name="fr4wav4")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,sameX,
+interaction1="smoke_beh_sim",name="fr4wav4")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,avSim,
+interaction1="fr4wav4",name="smoke_beh_sim")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,totSim,
+interaction1="fr4wav4",name="smoke_beh_sim")
+
+frndeff1_sim <- includeEffects(frndeff1_sim,recip,transTrip,
+name="fr4wav4")
+```
+
+```{r}
+RSmod1_sim<-siena07(myalgorithm,data=friend_sim,effects=frndeff1_simZ,batch=T,verbose = F,useCluster = T,initC = T,nbrNodes = 3,returnDeps=TRUE)
+```
+
+
+```{r}
+RSmod2_sim<-siena07(myalgorithm,data=friend_sim,effects=frndeff2_sim,batch=T,verbose = F,useCluster = T,initC = T,nbrNodes = 3,returnDeps=TRUE)
+```
+
+```{r}
+summary(RSmod1_sim)
+```
+
+```{r}
+summary(RSmod2_sim)
+```
+

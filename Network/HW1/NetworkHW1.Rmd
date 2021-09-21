@@ -1,0 +1,165 @@
+---
+title: "Network_HW1"
+author: "Chenrui Xu"
+date: "2021/2/1"
+output: html_document
+---
+
+```{r}
+library(statnet)
+library(UserNetR)
+```
+
+Part A
+diameter
+```{r}
+components(Moreno)
+lgc<-component.largest(Moreno,result = "graph")
+gd=geodist(lgc)
+max(gd$gdist)
+```
+There are two components in the Moreno network the diameter for the whole network doesn't exist. But we can calculate the diameter for each component and the answer is 11.
+
+transitivity
+```{r}
+gtrans(Moreno,mode="graph")
+```
+
+Part B
+```{R}
+#This is the transform matrix 
+netmat1<-rbind(
+  # 1 2 3 4 5 6 7 8 9 1011
+  c(0,1,1,0,0,0,0,0,0,1,0),#1
+  c(1,0,1,0,1,0,0,0,0,1,1),#2
+  c(1,1,0,1,1,0,0,0,0,0,1),#3
+  c(1,0,1,0,0,1,0,1,0,0,1),#4
+  c(0,1,0,0,0,1,0,1,0,1,1),#5
+  c(1,0,0,1,1,0,0,1,0,1,0),#6
+  c(0,0,0,0,1,0,0,0,0,0,0),#7
+  c(0,0,1,1,1,0,1,0,0,0,1),#8
+  c(0,0,0,0,0,0,0,1,0,1,0),#9
+  c(0,1,0,0,1,1,0,0,1,0,1),#10
+  c(0,1,1,1,1,0,0,1,0,0,0) #11
+)
+netmat1=t(netmat1)#the oringinal matrix was wrong so I used transpose to get the right one
+
+
+rownames(netmat1)<-c('1','2','3','4','5','6','7','8','9','10','11')
+colnames(netmat1)<-c('1','2','3','4','5','6','7','8','9','10','11')
+net1=network(netmat1,matrix.tpye="adjacency")
+```
+
+```{r}
+summary(net1)
+```
+
+```{r}
+set.vertex.attribute(net1,"color",c(1,2,2,2,3,4,4,3,4,2,3))
+net1%v%'alldeg'=degree(net1)
+list.vertex.attributes(net1)
+```
+
+```{r}
+col=net1%v%"color"
+gplot(net1,vertex.col = col,displaylabels=T)
+```
+
+size
+```{r}
+network.size(net1)
+```
+
+density
+```{r}
+gden(net1)
+```
+
+components
+```{r}
+components(net1)
+```
+
+diameter
+```{r}
+lgc1=component.largest(net1,result = "graph")
+N1=geodist(lgc1)
+max(N1$gdist)
+```
+
+transitivity
+```{r}
+gtrans(net1)
+```
+
+Part C
+```{r}
+netmat2<-rbind(
+  # 1 2 3 4 5 6 7 8 9 10111213141516171819
+  c(0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),#1
+  c(1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),#2
+  c(0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),#3
+  c(0,1,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0),#4
+  c(0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),#5
+  c(0,0,0,1,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0),#6
+  c(0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0),#7
+  c(0,0,0,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0),#8
+  c(0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0),#9
+  c(0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0),#10
+  c(0,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0),#11
+  c(0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0),#12
+  c(0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0),#13
+  c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0),#14
+  c(0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0),#15
+  c(0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0),#16
+  c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1),#17
+  c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1),#18
+  c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0) #19
+)
+
+rownames(netmat2)<-c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19')
+colnames(netmat2)<-c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19')
+net2=network(netmat2,matrix.tpye="adjacency")
+```
+
+```{r}
+summary(net2)
+```
+
+```{r}
+set.vertex.attribute(net2,"color",c(1,1,1,1,1,2,2,2,2,3,3,3,3,3,4,4,4,4,4))
+net2%v%'alldeg'=degree(net2)
+list.vertex.attributes(net2)
+```
+
+```{r}
+col=net2%v%"color"
+gplot(net2,vertex.col = col+1,displaylabels=T)
+```
+
+size
+```{r}
+network.size(net2)
+```
+
+density
+```{r}
+gden(net2)
+```
+
+components
+```{r}
+components(net2)
+```
+
+diameter
+```{r}
+lgc2=component.largest(net2,result="graph")
+N2=geodist(lgc2)
+max(N2$gdist)
+```
+
+transitivity
+```{r}
+gtrans(net2)
+```

@@ -1,0 +1,225 @@
+---
+title: "Network_HW4"
+author: "Chenrui Xu"
+date: "2021/2/28"
+output: html_document
+---
+
+```{r}
+library(UserNetR)
+library(statnet)
+library(igraph)
+```
+
+```{r}
+data(hwd)
+h1=hwd
+```
+
+```{r}
+V(h1)$name[1:10]
+```
+
+```{r}
+V(h1)$name[155:165]
+```
+
+```{r}
+V(h1)$type[1:10]
+```
+
+
+```{r}
+V(h1)$type[155:165]
+```
+So we can get that the first 160 index are the movies and from 161, the rest of them are actors.
+
+
+Here is the summary of the data.
+```{r}
+h1
+```
+There are 1365 nodes and 1600 edges (160 movies and 1205 actors). There are a few attributes in the data: name, type(to show 2-mode),year, rating, etc.
+
+```{r}
+#if type is group, we use square to represent node, if it is actor, use circle
+V(h1)$shape <- ifelse(
+   V(h1)$type==TRUE,
+   "square","circle")
+
+#same idea to use corresponding color
+V(h1)$color <- ifelse(
+   V(h1)$type==TRUE,
+   "red","lightblue")
+```
+
+```{r}
+#create a subgraph that filter three movies to analysis
+h2 <- subgraph.edges(h1, 
+E(h1)[inc(V(h1)[name %in%
+c("The Wolf of Wall Street", 
+  "Gangs of New York",
+  "The Departed")])])
+plot(h2, layout = layout_with_kk)
+```
+
+```{r}
+#to show number of movies each actor has, 955 actors engaged in one movie
+#only one actor has 8 moives and it turned out to be HarryPorter
+table(degree(h1,v=V(h1)[type==FALSE]))
+
+#average number of movies each actor has
+mean(degree(h1,v=V(h1)[type==FALSE]))
+
+V(h1)$deg <- degree(h1)
+V(h1)[type==FALSE & deg > 4]$name
+#to show the actor that has more than 4 moives
+```
+
+
+```{r}
+busy_actor <- data.frame(cbind(Actor = V(h1)[type==FALSE& deg > 4]$name,Movies = V(h1)[type==FALSE& deg > 4]$deg))
+busy_actor[order(busy_actor$Movies,decreasing=TRUE),]
+# to show the busy actors and their corresponding number of movies
+```
+
+```{r}
+for (i in 161:1365) {
+  V(h1)[i]$totrating <- sum(V(h1)[nei(i)]$IMDBrating)
+}
+
+for (i in 161:1365) {V(h1)[i]$avgrating <- mean(V(h1)[nei(i)]$IMDBrating)
+}
+```
+
+```{r}
+V(h1)[161:171]$totrating
+```
+
+```{r}
+V(h1)[161:171]$avgrating
+```
+
+```{r}
+pop_actor <- data.frame(cbind(Actor = V(h1)[type==FALSE & totrating > 40]$name,Popularity =V(h1)[type==FALSE &totrating > 40]$totrating))
+
+pop_actor[order(pop_actor$Popularity,decreasing=TRUE),]
+```
+
+```{r}
+num <- V(h1)[type==FALSE]$deg
+avgpop <- V(h1)[type==FALSE]$avgrating
+totpop <- V(h1)[type==FALSE]$totrating
+
+op <- par(mfrow=c(1,2))
+plot(num,totpop)
+plot(num,avgpop)
+par(op)
+```
+
+```{r}
+summary(lm(avgpop~num))
+```
+There is no significance to show the more movies the actor has the more population the actor is.
+
+The average rating of numbers of movies are around 7.5
+```{r}
+boxplot(avgpop~num)
+```
+
+Projection
+```{r}
+h1.pr <- bipartite.projection(h1)
+h1.act <- h1.pr$proj1
+h1.mov <- h1.pr$proj2
+h1.act
+h1.mov
+```
+
+```{r}
+op <- par(mar = rep(0, 4))
+plot(h1.mov,vertex.color="red",
+   vertex.shape="circle",
+   vertex.size=(V(h1.mov)$IMDBrating)-3,
+   vertex.label=NA)
+par(op)
+```
+
+```{r}
+graph.density(h1.mov)
+no.clusters(h1.mov)
+clusters(h1.mov)$csize
+table(E(h1.mov)$weight)
+```
+
+```{r}
+h2.mov <- induced.subgraph(h1.mov,vids=clusters(h1.mov)$membership==1)
+
+plot(h2.mov,vertex.color="red",
+edge.width=sqrt(E(h1.mov)$weight),
+vertex.shape="circle",
+vertex.size=(V(h2.mov)$IMDBrating)-3,
+vertex.label=NA)
+
+```
+
+```{r}
+table(graph.coreness(h2.mov))
+h3.mov <- induced.subgraph(h2.mov,vids=graph.coreness(h2.mov)>4)
+h3.mov
+
+plot(h3.mov,vertex.color="red",
+vertex.shape="circle",
+edge.width=sqrt(E(h1.mov)$weight),
+vertex.label.cex=0.7,
+vertex.label.color="darkgreen",
+vertex.label.dist=0.3,
+vertex.size=
+   (V(h3.mov)$IMDBrating)-3)
+
+
+```
+
+Part II  Bradley Cooper
+```{r}
+    h4 <- subgraph.edges(h1, 
+    E(h1)[inc(V(h1)[name %in%
+    c("Bradley Cooper")])])
+    plot(h4, layout = layout_with_kk)
+```
+
+```{r}
+V(h4)[type==TRUE]$name
+```
+
+```{r}
+h5 <- subgraph.edges(h1, 
+E(h1)[inc(V(h1)[name %in%c(V(h4)[type==TRUE]$name)
+])])
+plot(h5, layout = layout_with_kk)
+```
+
+Part III
+```{r}
+summary(h3.mov)
+V(h3.mov)
+```
+
+```{r}
+SW3 <- induced.subgraph(h1.mov,vids=c(V(h1.mov)[nei("Star Wars: Episode III - Revenge of the Sith")],V(h1.mov)[name%in%"Star Wars: Episode III - Revenge of the Sith"]))
+```
+
+```{r}
+plot(SW3, layout = layout_with_kk,,vertex.color="red",
+vertex.shape="circle",
+edge.width=sqrt(E(h1.mov)$weight),
+vertex.label.cex=0.7,
+vertex.label.color="darkgreen",
+vertex.label.dist=0.3,
+vertex.size=(V(h1.mov)$IMDBrating)-3)
+```
+
+```{r}
+
+
+```
