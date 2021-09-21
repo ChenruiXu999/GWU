@@ -1,0 +1,91 @@
+# %% Question 6
+W_ini=np.random.rand(1,2)
+b_ini=np.random.rand(1)
+
+
+def WX(w,x,b):
+    y=np.dot(w,np.transpose(x))+b
+    return y
+def hardlim_Q6(y):
+    if y>=0:
+        a1=1
+    else:
+        a1=0
+    return a1
+
+def iteration(t,a,w,x,b):
+    e= t-a
+    if e != 0:
+        w = w+e*x
+        b=b+e
+    else:
+        print(w,b)
+    return w,b,e
+    
+def training(w,x,b,t,i):
+    for j in range(10):
+        y=WX(w,x,b)
+        a1=hardlim_Q6(y)
+        w,b,e=iteration(t,a1,w,x,b)
+    return w,x,b,t
+
+
+def test(w,x,b,t,i):  
+    y=WX(w,x,b)
+    a1=hardlim_Q6(y)
+    if t-a1==0:
+        print("Training dataset NO.",i+1,"result is right!")
+    else:
+        print("False, NO.",i+1,"not satisfied")
+        list.append(i)
+    #return list
+
+
+t=np.array([[0,0,0,0,1,1,1,1]])
+X=np.array([[1,1,2,2,3,3,4,4],
+            [4,5,4,5,1,2,1,2]])
+
+W_ini=np.array([[3,3]])
+b_ini=np.array([[1]])
+
+w=W_ini
+b=b_ini
+#E=[]
+list=[]
+
+for l in range(5):
+    for i in range(len(t[0])):
+        x=np.transpose(X)[i]
+        for j in range(5):
+            y=WX(w,x,b)
+            a1=hardlim_Q6(y)
+            w,b,e=iteration(t[0][i],a1,w,x,b)
+            
+
+    for i in range(len(t[0])):
+        x=np.transpose(X)[i]
+        test(w,x,b,t[0][i],i)
+
+    for i in list:
+        #print(t[0][i])
+        x=np.transpose(X)[i]
+        for j in range(5):
+            y=WX(w,x,b)
+            a1=hardlim_Q6(y)
+            w,b,e=iteration(t[0][i],a1,w,x,b)
+
+    list=[]
+    for i in range(len(t[0])):
+        x=np.transpose(X)[i]
+        test(w,x,b,t[0][i],i)
+
+w=W_ini
+b=b_ini
+x=np.transpose(X)[i]
+for j in range(50):
+    y=WX(w,x,b)
+    a1=hardlim_Q6(y)
+    w,b,e=iteration(t[0][i],a1,w,x,b)
+    if e == 0:
+        break
+    print(w,"&&&&&&&&&&&&&&",b)
